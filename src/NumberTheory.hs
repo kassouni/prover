@@ -11,6 +11,7 @@ import Data.Foldable
 import Structure
 
 import Text.PrettyPrint.HughesPJClass
+import BooleanAlgebra
 
 import Prelude hiding ((<>))
 

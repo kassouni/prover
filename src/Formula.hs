@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 
 module Formula where
@@ -13,6 +14,7 @@ import GHC.Exts (Constraint)
 import Data.Functor
 
 import Text.PrettyPrint
+import BooleanAlgebra
 
 type Symbol = Char
 
@@ -55,11 +57,10 @@ instance Show (Formula r t) where
     show (Not f) = "Not " ++ paren (show f) 
     show (Forall x phi) = "Forall " ++ show x ++ " " ++ paren (show phi)
 
-and :: Formula r t -> Formula r t -> Formula r t
-and α β = Not (Or (Not α) (Not β))
-
-implies :: Formula r t -> Formula r t -> Formula r t
-implies α = Or (Not α)
+instance BooleanAlgebraic (Formula r (Term f))  where
+    not = Not
+    or = Or
+    bottom = Not (Eq (Var 'x') (Var 'x'))
 
 varsT :: Foldable f => Term f -> [Symbol]
 varsT (Var x) = [x]
@@ -98,10 +99,3 @@ substituteFormula x t (Rel r) = Rel (substituteTerm x t <$> r)
 substituteFormula x t (Or α β) = Or (substituteFormula x t α) (substituteFormula x t β)
 substituteFormula x t (Not φ) = Not (substituteFormula x t φ)
 substituteFormula x t φ@(Forall y α) = if x == y then φ else Forall y (substituteFormula x t α)
-
-
-bottom :: Formula r (Term f)
-bottom = Not top
-
-top :: Formula r (Term f)
-top = Eq (Var 'x') (Var 'x')
