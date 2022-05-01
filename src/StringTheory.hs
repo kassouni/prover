@@ -13,9 +13,8 @@ data SRel term = R String [term] deriving (Eq, Functor, Foldable, Show)
 
 type SFormula = Formula SRel STerm
 
-function :: String -> [Term SFun] -> Term SFun
+function :: String -> [Term SFun Char] -> Term SFun Char
 function str ts = Fun (F str ts)
 
-relation :: String -> [Term SFun] -> Formula SRel (Term SFun)
+relation :: String -> [Term SFun Char] -> Formula SRel SFun Char
 relation str ts = Rel (R str ts)
-

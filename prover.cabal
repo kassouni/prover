@@ -27,6 +27,7 @@ library
   exposed-modules:
       Axioms
       BooleanAlgebra
+      Deduction
       Formula
       Godel
       Lib
@@ -34,6 +35,8 @@ library
       Proposition
       StringTheory
       Structure
+      Tex
+      Unification
   other-modules:
       Paths_prover
   hs-source-dirs:
@@ -41,6 +44,7 @@ library
   build-depends:
       HUnit
     , base >=4.7 && <5
+    , free
     , pretty
     , primes
   default-language: Haskell2010
@@ -55,6 +59,7 @@ executable prover-exe
   build-depends:
       HUnit
     , base >=4.7 && <5
+    , free
     , pretty
     , primes
     , prover
@@ -73,6 +78,7 @@ test-suite prover-test
   build-depends:
       HUnit
     , base >=4.7 && <5
+    , free
     , pretty
     , primes
     , prover

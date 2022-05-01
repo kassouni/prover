@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Proposition where
 
 
@@ -36,12 +37,13 @@ evalAssignment (PNot α) s = Prelude.not (evalAssignment α s)
 tautological :: Eq a => Proposition a -> Bool
 tautological φ = all (evalAssignment φ) (allAssignments (toList φ))
 
-propositionalize :: Formula r t -> Proposition String
-propositionalize (Or α β) = POr (propositionalize α) (propositionalize β)
+propositionalize :: Show (Formula r f v) => Formula r f v -> Proposition String
+propositionalize (And αs) = conjunction (propositionalize <$> αs)
+propositionalize (Impl α β) = undefined 
 propositionalize (Not α) = PNot (propositionalize α)
 propositionalize φ@Forall {} = PVar $ show φ
 propositionalize φ@Eq {} = PVar $ show φ
 propositionalize φ@Rel {} = PVar $ show φ
 
-propositionalConsequence :: [Formula r (Term f)] -> Formula r (Term f) -> Bool
+propositionalConsequence :: Show (Formula r f v) => [Formula r f v] -> Formula r f v -> Bool
 propositionalConsequence γ φ = tautological (implies (conjunction (propositionalize <$> γ)) (propositionalize φ))

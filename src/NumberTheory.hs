@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 module NumberTheory where
 
@@ -14,6 +13,8 @@ import Text.PrettyPrint.HughesPJClass
 import BooleanAlgebra
 
 import Prelude hiding ((<>))
+import qualified Text.PrettyPrint.Annotated.HughesPJClass as Text
+import Data.List (intersperse)
 
 data NTFun term = 
     Zero | 
@@ -23,47 +24,24 @@ data NTFun term =
     Exp term term 
         deriving (Show, Foldable, Functor, Eq)
 
-type NTTerm = Term NTFun
+type NTTerm = Term NTFun Char
+type NTFormula = Formula NTRel NTFun Char
 
-zero :: Term NTFun
+zero :: NTTerm
 zero = Fun Zero
 
-nBar :: Natural -> Term NTFun
+nBar :: Natural -> NTTerm
 nBar 0 = zero
 nBar n = Fun (S (nBar (n - 1)))
 
-example :: Term NTFun
-example = Fun (Add (Fun (S zero)) (Var 'x'))
-
-vs :: [Symbol]
-vs = varsT example
-
 data NTRel term = Lt term term deriving (Show, Foldable, Functor, Eq)
 
-type NTFormula = Formula NTRel NTTerm
 
-ppBinop :: Pretty a => a -> a -> Char -> Doc
-ppBinop d1 d2 b = parens (pPrint d1) <+> char b <+> parens (pPrint d2)
+ppBinop :: Pretty a => a -> a -> String -> Doc
+ppBinop d1 d2 b = parens (pPrint d1) <+> text b <+> parens (pPrint d2)
 
-instance Pretty NTTerm where
-    pPrint (Var x) = char x 
-    pPrint (Fun Zero) = text "0" 
-    pPrint (Fun (S t)) = text "S" <> parens (pPrint t)
-    pPrint (Fun (Add t1 t2)) = ppBinop t1 t2 '+'
-    pPrint (Fun (Mult t1 t2)) = ppBinop t1 t2 '×'
-    pPrint (Fun (Exp t1 t2)) = ppBinop t1 t2 '^'
 
-instance Pretty t => Pretty (NTRel t) where
-    pPrint (Lt t1 t2) = ppBinop t1 t2 '<'
-
-instance Pretty NTFormula where
-    pPrint (Eq t1 t2) = ppBinop t1 t2 '=' 
-    pPrint (Rel r) = pPrint r
-    pPrint (Or α β) = ppBinop α β '∨'
-    pPrint (Not φ) = char '¬' <> parens (pPrint φ)
-    pPrint (Forall x f) = parens (char '∀' <> char x) <> parens (pPrint f)
-
-formula :: Formula NTRel NTTerm
+formula :: NTFormula
 formula = Forall 'x' (Rel (Lt (Fun Zero) (Fun Zero)))
 
 ntFunInterp :: NTFun Natural -> Natural
@@ -92,12 +70,12 @@ a1 = Forall 'x' (Not (Eq (nTsucc x) (Fun Zero)))
 x = Var 'x'
 y = Var 'y'
 
-nTsucc :: Term NTFun -> Term NTFun
+nTsucc :: NTTerm -> NTTerm
 nTsucc = Fun . S
 
 a2 :: NTFormula
 -- (∀x) (∀y) [Sx = Sy -> x = y]
-a2 = Forall 'x' (Forall 'y' (implies (Eq (nTsucc x) (nTsucc y)) (Eq x y)))
+a2 = Forall 'x' (Forall 'y' (Impl (Eq (nTsucc x) (nTsucc y)) (Eq x y)))
 
 a3 :: NTFormula
 -- (∀x) x + 0 = x

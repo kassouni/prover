@@ -24,6 +24,7 @@ dependencies:
 - HUnit
 - pretty
 - primes
+- free
 
 library:
   source-dirs: src
